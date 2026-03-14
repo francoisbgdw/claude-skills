@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "azure-devops": {
+      "command": "npx",
+      "args": ["-y", "@azure-devops/mcp"],
+      "disabled": true,
+      "_comment": "Enable and add your org URL: args should be ['-y', '@azure-devops/mcp', 'https://dev.azure.com/YOUR_ORG']"
+    }
+  }
+}
