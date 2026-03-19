@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-This repo is a Claude Code **plugin** containing reusable skills for data engineering workflows. It targets: GitHub, Azure, Azure DevOps, MS Fabric, Power BI, Playwright, and DAX. Designed to be used across repos via `--plugin-dir`, `--add-dir`, or the plugin marketplace.
+This repo is a Claude Code **plugin** containing reusable skills for data engineering workflows and development process automation. It targets: GitHub, Azure, Azure DevOps, MS Fabric, Power BI, Playwright, DAX, and cross-cutting process skills (code review, debugging, shipping). Inspired in part by [gstack](https://github.com/garrytan/gstack). Designed to be used across repos via `--plugin-dir`, `--add-dir`, or the plugin marketplace.
 
 ## Repo Structure
 
@@ -15,6 +15,7 @@ claude_skills/
 ├── .claude-plugin/plugin.json     # Plugin manifest (name: data-engineering-skills)
 ├── .mcp.json                      # Optional MCP server configs
 ├── skills/
+│   ├── _shared/safety.md          # Circuit breaker & safety patterns (shared across skills)
 │   ├── github/SKILL.md            # gh CLI workflows
 │   ├── azure/SKILL.md             # az CLI for data engineering
 │   ├── azure-devops/              # az devops: pipelines, work items
@@ -27,13 +28,18 @@ claude_skills/
 │   ├── powerbi/                   # Power BI Service management
 │   │   ├── SKILL.md
 │   │   └── api-reference.md
-│   ├── playwright/                # Browser automation
+│   ├── playwright/                # Browser automation (accessibility-first refs)
 │   │   ├── SKILL.md
 │   │   ├── run.js                 # Universal script executor
 │   │   └── package.json
-│   └── dax/                       # DAX authoring & optimization
-│       ├── SKILL.md
-│       └── dax-patterns.md        # Pattern library
+│   ├── dax/                       # DAX authoring & optimization
+│   │   ├── SKILL.md
+│   │   └── dax-patterns.md        # Pattern library
+│   ├── review/                    # Two-pass code review (auto-fix + ASK)
+│   │   ├── SKILL.md
+│   │   └── checklist.md           # Review checklist by category
+│   ├── debug/SKILL.md             # Systematic root-cause debugging
+│   └── ship/SKILL.md              # Full release pipeline
 └── CLAUDE.md
 ```
 
@@ -68,3 +74,6 @@ claude --add-dir /path/to/claude_skills
 | powerbi | `az` CLI | `pbipy`, Power BI MCP, `semantic-link` |
 | playwright | Node.js 18+ | — |
 | dax | Python 3.10+ | `semantic-link`, `semantic-link-labs` |
+| review | `git`, `gh` CLI | — |
+| debug | `git` | — |
+| ship | `git`, `gh` CLI | — |

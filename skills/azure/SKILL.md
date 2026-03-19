@@ -19,6 +19,19 @@ You have full access to the `az` CLI. The user is authenticated via `az login`.
 - **Flag production resources** — if a resource name contains "prod", "prd", or "production", warn the user explicitly
 - Prefer `--output table` for human-readable output, `--output json` for programmatic use
 
+## Circuit breaker
+
+For bulk or iterative operations (e.g., tagging multiple resources, scaling pools, deleting old resources), apply self-regulation from [shared safety patterns](../_shared/safety.md):
+
+- Track a mental risk score starting at 0%
+- Each operation on a production resource: +15% risk
+- Each operation touching more than 5 resources: +5% risk
+- Any operation that fails or is reverted: +15% risk
+- Touching resources outside the original scope: +20% risk
+- **Risk > 20%**: Stop and confirm with the user before continuing
+- **Hard cap**: Never execute more than 50 resource modifications without a user checkpoint
+- For bulk deletes: always list all resources first, show the count, and require explicit confirmation
+
 ## Subscription & account management
 
 ```bash

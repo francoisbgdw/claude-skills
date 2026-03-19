@@ -1,7 +1,7 @@
 {
   "name": "data-engineering-skills",
-  "description": "Claude Code skills for data engineering: GitHub, Azure, MS Fabric, Power BI, DevOps, Playwright, DAX",
-  "version": "0.1.0",
+  "description": "Claude Code skills for data engineering and development workflows: GitHub, Azure, MS Fabric, Power BI, DevOps, Playwright, DAX, code review, debugging, and release management",
+  "version": "0.2.0",
   "author": {
     "name": "Francois de Wet"
   }

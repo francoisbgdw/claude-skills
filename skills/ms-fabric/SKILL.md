@@ -12,6 +12,21 @@ Fabric has no dedicated CLI. Use the Fabric REST API via `az rest` or Python SDK
 
 - Azure account: !`az account show --query "{name:name, id:id}" -o tsv 2>/dev/null || echo "not logged in — run: az login"`
 
+## Safety rules & circuit breaker
+
+- **ALWAYS confirm before deleting workspaces, items, or triggering deployments**
+- **Flag production workspaces** — if a workspace name contains "prod", "prd", or "production", warn explicitly
+- **Show workspace name and item ID before any modification**
+
+For bulk or iterative operations (refreshing multiple models, deploying across workspaces, deleting items), apply self-regulation from [shared safety patterns](../_shared/safety.md):
+
+- Track a mental risk score starting at 0%
+- Each operation on a production workspace: +15% risk
+- Each failed refresh or deployment: +15% risk
+- Operations outside the originally-specified workspace: +20% risk
+- **Risk > 20%**: Stop and confirm with the user
+- **Hard cap**: Never execute more than 50 API calls in a modification loop without a user checkpoint
+
 ## REST API via az rest
 
 The Fabric REST API base URL is `https://api.fabric.microsoft.com/v1`.

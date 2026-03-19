@@ -70,6 +70,87 @@ const { chromium } = require('playwright');
 })();
 ```
 
+## Element ref system (accessibility-first)
+
+Instead of guessing fragile CSS selectors, use the accessibility tree to discover elements and interact via role-based locators. This is more robust against DOM changes, React hydration, and Shadow DOM.
+
+### Step 1: Snapshot the accessibility tree
+
+```javascript
+// Get the full accessibility tree with roles and names
+const snapshot = await page.accessibility.snapshot();
+console.log(JSON.stringify(snapshot, null, 2));
+```
+
+This returns a tree of elements with their roles (button, link, textbox, heading, etc.) and accessible names.
+
+### Step 2: Use role-based locators (preferred)
+
+```javascript
+// Instead of: page.click('button.submit-btn')
+// Use:
+await page.getByRole('button', { name: 'Submit' }).click();
+
+// Instead of: page.fill('input#email')
+// Use:
+await page.getByRole('textbox', { name: 'Email' }).fill('user@example.com');
+
+// Instead of: page.click('a.nav-link')
+// Use:
+await page.getByRole('link', { name: 'Dashboard' }).click();
+
+// Instead of: page.click('input[type="checkbox"]')
+// Use:
+await page.getByRole('checkbox', { name: 'Remember me' }).check();
+```
+
+### Step 3: Locator priority (most to least robust)
+
+1. **`getByRole`** — uses ARIA roles and accessible names. Most resilient to DOM changes.
+2. **`getByLabel`** — finds form inputs by their associated label text.
+3. **`getByPlaceholder`** — finds inputs by placeholder text.
+4. **`getByText`** — finds elements by visible text content.
+5. **`getByTestId`** — finds elements by `data-testid` attribute (requires app support).
+6. **CSS selectors** — last resort. Fragile, breaks on refactors.
+
+### Interactive element discovery
+
+When you don't know what elements are on the page, take a snapshot first:
+
+```javascript
+// Discover all interactive elements
+const snapshot = await page.accessibility.snapshot();
+
+function listInteractive(node, depth = 0) {
+  const interactive = ['button', 'link', 'textbox', 'checkbox', 'radio',
+                        'combobox', 'menuitem', 'tab', 'switch'];
+  if (interactive.includes(node.role)) {
+    console.log(`${'  '.repeat(depth)}[${node.role}] "${node.name}"`);
+  }
+  if (node.children) {
+    for (const child of node.children) {
+      listInteractive(child, depth + 1);
+    }
+  }
+}
+
+listInteractive(snapshot);
+```
+
+Output example:
+```
+[link] "Home"
+[link] "Dashboard"
+[textbox] "Search"
+[button] "Submit"
+[checkbox] "Remember me"
+```
+
+Then interact using the discovered roles and names:
+```javascript
+await page.getByRole('link', { name: 'Dashboard' }).click();
+```
+
 ## Common patterns
 
 ### Navigate and screenshot
@@ -81,10 +162,10 @@ await page.screenshot({ path: '/tmp/screenshot.png', fullPage: true });
 
 ### Fill forms
 ```javascript
-await page.fill('input[name="email"]', 'user@example.com');
-await page.selectOption('select#country', 'US');
-await page.check('input[type="checkbox"]');
-await page.click('button[type="submit"]');
+await page.getByRole('textbox', { name: 'Email' }).fill('user@example.com');
+await page.getByRole('combobox', { name: 'Country' }).selectOption('US');
+await page.getByRole('checkbox', { name: 'Terms' }).check();
+await page.getByRole('button', { name: 'Submit' }).click();
 ```
 
 ### Wait for elements
@@ -112,12 +193,6 @@ const context = await browser.newContext({
 await context.addCookies([{ name: 'session', value: 'token', domain: '.example.com', path: '/' }]);
 ```
 
-### Accessibility tree (fast inspection)
-```javascript
-const snapshot = await page.accessibility.snapshot();
-console.log(JSON.stringify(snapshot, null, 2));
-```
-
 ### Multiple pages / tabs
 ```javascript
 const [newPage] = await Promise.all([
@@ -126,6 +201,26 @@ const [newPage] = await Promise.all([
 ]);
 await newPage.waitForLoadState();
 ```
+
+## Persistent browser pattern
+
+For multi-step workflows that require many browser interactions, keep the browser alive across commands instead of cold-starting each time:
+
+```javascript
+const { chromium } = require('playwright');
+
+// Launch once, reuse across interactions
+const browser = await chromium.launch({ headless: false });
+const context = await browser.newContext();
+const page = await context.newPage();
+
+// ... perform multiple interactions without closing ...
+
+// Only close when fully done
+await browser.close();
+```
+
+When writing multi-step automation scripts, structure them as a single script with sequential steps rather than launching/closing the browser for each step. This is faster and preserves state (cookies, localStorage, session).
 
 ## Test generation
 
@@ -138,10 +233,12 @@ This opens a browser and records your actions as Playwright code.
 
 ## Tips
 
+- Prefer role-based locators (`getByRole`, `getByLabel`) over CSS selectors for resilience
+- Use the accessibility tree snapshot to discover elements before writing selectors
 - Use `headless: false` during development to see what's happening
 - Use `slowMo: 100` to slow down actions for debugging
 - Always take screenshots on errors for debugging
 - Use `page.waitForLoadState('networkidle')` after navigation
-- Prefer accessibility selectors (`role`, `label`) over CSS selectors for resilience
 - Set timeouts appropriate to the operation (default 30s)
 - Clean up `/tmp/playwright-*` files after use
+- For multi-step workflows, use a single script to avoid cold-start overhead
