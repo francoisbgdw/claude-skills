@@ -25,9 +25,12 @@ claude_skills/
 │   │   ├── SKILL.md
 │   │   ├── api-reference.md
 │   │   └── scripts/fabric_helpers.py
-│   ├── powerbi/                   # Power BI Service management
+│   ├── powerbi/                   # Power BI Service, themes, embedding, PBIR
 │   │   ├── SKILL.md
-│   │   └── api-reference.md
+│   │   ├── api-reference.md
+│   │   ├── themes.md              # Theme JSON schema, templates, accessibility
+│   │   ├── pbir-reference.md      # PBIR/PBIP format, git workflow, programmatic editing
+│   │   └── embedded.md            # JS SDK embedding, custom visuals, report authoring
 │   ├── playwright/                # Browser automation (accessibility-first refs)
 │   │   ├── SKILL.md
 │   │   ├── run.js                 # Universal script executor

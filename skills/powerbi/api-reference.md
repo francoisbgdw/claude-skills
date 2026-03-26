@@ -145,6 +145,24 @@ curl -X POST "https://api.powerbi.com/v1.0/myorg/groups/{wsId}/imports?datasetDi
   -F "file=@report.pbix"
 ```
 
+### Embed Tokens
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/groups/{wsId}/reports/{id}/GenerateToken` | Generate embed token for a report |
+| POST | `/groups/{wsId}/dashboards/{id}/GenerateToken` | Generate embed token for a dashboard |
+| POST | `/groups/{wsId}/datasets/{id}/GenerateToken` | Generate embed token for a dataset |
+| POST | `/GenerateToken` | Generate multi-resource embed token |
+
+### Push Datasets (Real-Time Streaming)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/groups/{wsId}/datasets` | Create a push dataset (with `defaultMode: "Push"`) |
+| POST | `/groups/{wsId}/datasets/{id}/tables/{tableName}/rows` | Push rows to a table |
+| DELETE | `/groups/{wsId}/datasets/{id}/tables/{tableName}/rows` | Clear all rows from a table |
+| PUT | `/groups/{wsId}/datasets/{id}/tables/{tableName}` | Update table schema |
+
 ## Throttling
 
 Power BI uses throttling to maintain performance. When throttled:

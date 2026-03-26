@@ -1,7 +1,7 @@
 ---
 name: powerbi
-description: Power BI report, dataset, and workspace management — refresh datasets, manage reports, deploy content, administer workspaces, embed analytics. Use when working with Power BI Service, managing datasets/reports, triggering refreshes, or automating Power BI administration.
-allowed-tools: Bash(az rest *), Bash(python *), Bash(pip *), Read, Write, Grep, Glob
+description: Power BI report, dataset, and workspace management — refresh datasets, manage reports, deploy content, administer workspaces, embed analytics, author themes, develop custom visuals, and work with PBIR/PBIP code-first report formats. Use when working with Power BI Service, managing datasets/reports, triggering refreshes, automating Power BI administration, building embedded analytics, creating themes, or developing Power BI frontend experiences.
+allowed-tools: Bash(az rest *), Bash(python *), Bash(pip *), Bash(npm *), Bash(npx *), Bash(node *), Bash(pbiviz *), Read, Write, Grep, Glob
 ---
 
 # Power BI Management & Automation
@@ -236,10 +236,51 @@ Use deployment pipelines for managed promotion:
 az rest --method POST --url "https://api.powerbi.com/v1.0/myorg/pipelines/{pipelineId}/deployAll" --body '{"sourceStageOrder": 0}'
 ```
 
+## Theme development
+
+Power BI themes are JSON files that control colors, typography, and visual formatting across an entire report. For full schema, starter templates, accessibility best practices, and application methods, see [themes.md](themes.md).
+
+Quick reference:
+```bash
+# Apply theme via Power BI Embedded JS SDK
+# report.applyTheme({ themeJson: themeObject });
+
+# Apply theme via Semantic Link Labs (Fabric notebooks)
+# rpt = labs.get_report("My Report", workspace="My Workspace")
+# rpt.set_theme(theme_json=theme)
+```
+
+Theme files in PBIR projects live at: `MyReport.Report/StaticResources/SharedResources/BaseThemes/`.
+
+## PBIR & PBIP (Code-First Development)
+
+PBIR (Enhanced Report Format) decomposes reports into individual JSON files per visual, page, and bookmark — enabling git-friendly, code-first Power BI development. PBIP (Power BI Project) is the project container pairing a PBIR report with a TMDL semantic model.
+
+**PBIR is the default format for new reports as of March 2026.** For folder structure, JSON schemas, git workflow, and programmatic editing patterns, see [pbir-reference.md](pbir-reference.md).
+
+Key capabilities:
+- Edit report visuals, pages, and themes as individual JSON files
+- Use VS Code with IntelliSense via Microsoft's published JSON schemas
+- Git branching with per-file diffs (no monolithic blobs)
+- Batch-modify visuals, copy pages between reports, CI/CD validation
+- External tool compatibility: Tabular Editor, DAX Studio, ALM Toolkit
+
+## Frontend development (Embedding & Custom Visuals)
+
+For building web applications with embedded Power BI content, creating custom visuals, or programmatic report authoring, see [embedded.md](embedded.md).
+
+Covers:
+- **Power BI Embedded** (`powerbi-client` JS SDK) — embed reports/dashboards in web apps, handle events, runtime theme switching
+- **Report Authoring SDK** (`powerbi-report-authoring`) — programmatic visual CRUD, data binding, layout manipulation
+- **Custom Visuals SDK** (`pbiviz`) — create, develop, and package custom visuals
+- **Paginated Reports** (RDL) — XML-based pixel-perfect reports
+- **Embed Token API** — token generation and refresh patterns
+
 ## Relationship with Fabric and DAX skills
 
 - **Fabric skill**: Manages Fabric-specific items (lakehouses, warehouses, notebooks, Fabric pipelines). Power BI datasets/reports in Fabric are also accessible via this skill's REST API.
 - **DAX skill**: Focuses on writing and optimizing DAX queries. Use `executeQueries` endpoint from this skill or `evaluate_dax()` from semantic-link to run DAX against Power BI datasets.
+- **PBIR crossover**: PBIP projects contain both a `.Report/` folder (PBIR, managed by this skill) and a `.SemanticModel/` folder (TMDL, editable with the DAX skill or Tabular Editor).
 
 ## Optional: Power BI MCP Servers
 
